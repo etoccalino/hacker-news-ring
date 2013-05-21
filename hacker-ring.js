@@ -19,14 +19,22 @@ RingApp.COLOR_MAP = [
   0xff0000,
   0x500000,
   0x101010];
-
 RingApp.URL_MAP = [
   'http://google.com',
   'http://yahoo.com',
   'http://news.ycombinator.com',
   'http://stackoverflow.com',
   'http://github.com',
+  'http://imdb.com',
   'http://creativa77.com.ar'];
+RingApp.TEXT_MAP = [
+  'google',
+  'yahoo',
+  'hacker-news',
+  'stackoverflow',
+  'github',
+  'imdb',
+  'creativa77'];
 
 
 RingApp.prototype.init = function (params) {
@@ -121,7 +129,7 @@ Ring.prototype.init = function () {
     element.init({radium: this.radium, index: i});
 
     // Add the element to the ring
-    this.object3D.add(element.mesh);
+    this.addChild(element);
 
     this.elements.push(element);
   }
@@ -180,27 +188,78 @@ RingElement = function () {
 RingElement.prototype = new Sim.Object();
 
 RingElement.WIDTH = 1;
+RingElement.TEXT_MATERIAL = new THREE.MeshPhongMaterial({color: 0xf0f0f0, overdraw: true});
 
 RingElement.prototype.init = function (params) {
   this.params = params || {};
 
+  // Create a group for the page and its text
+  this.setObject3D(new THREE.Object3D());
+
+  // Compute the element's position and orientation around the ring
+  var f = Math.PI * 2 / RingApp.ELEMENTS_NUMBER
+    , position = {
+        x: this.params.radium * Math.sin(f * this.params.index)
+      , y: 0
+      , z: this.params.radium * Math.cos(f * this.params.index)
+    }
+    , rotation = {
+        x: 0
+      , y: f * this.params.index
+      , z: 0
+    };
+
+  // Create a page on which to write
+  this.createPage();
+  this.createText();
+
+  // Position it around the ring
+  this.object3D.position = position;
+
+  // Rotate the element to face outside
+  this.object3D.rotation = rotation;
+}
+
+RingElement.prototype.createPage = function () {
+
   var geometry = new THREE.PlaneGeometry(RingElement.WIDTH, RingElement.WIDTH, 16, 16)
     , color = RingApp.COLOR_MAP[this.params.index]
     , material = new THREE.MeshBasicMaterial({color: color})
-    , mesh = new THREE.Mesh(geometry, material)
-    , f = Math.PI * 2 / RingApp.ELEMENTS_NUMBER;
+    , mesh = new THREE.Mesh(geometry, material);
 
+  // Pages are double sided, to cover the text
   mesh.doubleSided = true;
 
-  // Position it around the ring
-  mesh.position.x = this.params.radium * Math.sin(f * this.params.index);
-  mesh.position.z = this.params.radium * Math.cos(f * this.params.index);
+  // Add the page to this element group
+  this.object3D.add(mesh);
+}
 
-  // Rotate the element to face outside
-  mesh.rotation.y = f * params.index;
+RingElement.prototype.createText = function () {
+  var size = this.params.size || .1
+    , height = this.params.height || .02
+    , curveSegments = this.params.curveSegments || 2;
 
-  // Keep a reference to the mesh to handle mouse events
-  this.mesh = mesh;
+  // Contruct a text geometry for this text
+  var text = RingApp.TEXT_MAP[this.params.index]
+    , geometry = new THREE.TextGeometry(text, {
+        size: size,
+        height: height,
+        curveSegments: curveSegments,
+        font: 'helvetiker'
+    });
+
+  // Build the text mesh
+  var mesh = new THREE.Mesh(geometry, RingElement.TEXT_MATERIAL);
+
+  // Position the mesh centered in x
+  geometry.computeBoundingBox();
+  var centerOffset = -0.5 * (geometry.boundingBox.x[1] - geometry.boundingBox.x[0]);
+  mesh.position.x += centerOffset;
+
+  mesh.position.z = 0.1 * height;
+
+  // Add the page to this element group
+  this.object3D.add(mesh);
 }
 
 RingElement.prototype.goTo = function () {
