@@ -81,6 +81,8 @@ Ring = function () {
 }
 Ring.prototype = new Sim.Object();
 
+Ring.ANIMATION_INTERVAL = 500;
+
 Ring.prototype.init = function () {
   // The ring group to move elements together
   this.setObject3D(new THREE.Object3D());
@@ -109,12 +111,17 @@ Ring.prototype.rotate = function (deltaY) {
     this.animating = !this.animating;
 
     // Compute the final value to tween to
-    var newY = this.object3D.rotation.y + this.angle;
+    var newY = this.object3D.rotation.y + deltaY;
 
     // Start TWEEN, the app will update it
+    var that = this;
     new TWEEN.Tween(this.object3D.rotation)
-      .to({y: newY}, 500)
+      .to({y: newY}, Ring.ANIMATION_INTERVAL)
       .easing(TWEEN.Easing.Quadratic.EaseIn)
+      .onComplete(function () {
+        // Unlock the animation
+        that.animating = !that.animating;
+      })
       .start();
   }
 }
