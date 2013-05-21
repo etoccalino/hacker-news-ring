@@ -20,6 +20,15 @@ RingApp.COLOR_MAP = [
   0xf00000,
   0x101010];
 
+RingApp.URL_MAP = [
+  'http://google.com',
+  'http://yahoo.com',
+  'http://news.ycombinator.com',
+  'http://stackoverflow.com',
+  'http://github.com',
+  'http://creativa77.com.ar'];
+
+
 RingApp.prototype.init = function (params) {
 
   // Borrow initializer from Sim.App to set up scene, renderer, camera
@@ -51,11 +60,21 @@ RingApp.prototype.handleMouseDown = function(x, y)
   var width = this.container.clientWidth
     , xToCenter = x - width / 2;
 
-  if (xToCenter > 0) {
-    this.ring.rotateClockwise();
+  //
+  // ERROR: xToCenter is in pixes, RingElement.WIDTH is in meters
+  //
+  if (Math.abs(xToCenter) < RingElement.WIDTH*100 / 2) {
+    // Clicked on the front element
+    this.ring.select();
   }
   else {
-    this.ring.rotateCounterClockwise();
+    // Trigger elements rotation
+    if (xToCenter > 0) {
+      this.ring.rotateClockwise();
+    }
+    else {
+      this.ring.rotateCounterClockwise();
+    }
   }
 }
 
@@ -72,6 +91,7 @@ RingApp.prototype.handleMouseScroll = function(delta)
     this.camera.position.z = RingApp.MAX_CAMERA_Z;
 }
 
+
 //
 //
 //
@@ -87,6 +107,9 @@ Ring.prototype.init = function () {
   // The ring group to move elements together
   this.setObject3D(new THREE.Object3D());
 
+  // Keep a reference to the elements
+  this.elements = [];
+
   // Compute the radium of the ring, and the element angle
   this.radium = (3 * RingApp.ELEMENTS_NUMBER * RingElement.WIDTH) / (4 * Math.PI);
   this.angle = 2 * Math.PI / RingApp.ELEMENTS_NUMBER;
@@ -99,10 +122,16 @@ Ring.prototype.init = function () {
 
     // Add the element to the ring
     this.object3D.add(element.mesh);
+
+    this.elements.push(element);
   }
 
   // Keep track of the selected element
   this.selected = 0;
+}
+
+Ring.prototype.select = function () {
+  this.elements[this.selected].goTo();
 }
 
 Ring.prototype.rotate = function (deltaY) {
@@ -128,10 +157,16 @@ Ring.prototype.rotate = function (deltaY) {
 
 Ring.prototype.rotateClockwise = function () {
   this.rotate(-this.angle);
+
+  this.selected -= 1;
+  if (this.selected < 0) this.selected = RingApp.ELEMENTS_NUMBER - 1;
 }
 
 Ring.prototype.rotateCounterClockwise = function () {
   this.rotate(this.angle);
+
+  this.selected += 1;
+  if (this.selected == RingApp.ELEMENTS_NUMBER) this.selected = 0;
 }
 
 //
@@ -149,7 +184,7 @@ RingElement.WIDTH = 1;
 RingElement.prototype.init = function (params) {
   this.params = params || {};
 
-  var geometry = new THREE.CubeGeometry(RingElement.WIDTH, RingElement.WIDTH, RingElement.WIDTH, 16, 16, 16)
+  var geometry = new THREE.CubeGeometry(RingElement.WIDTH, RingElement.WIDTH, RingElement.WIDTH / 16, 16, 16, 16)
     , color = RingApp.COLOR_MAP[this.params.index]
     , material = new THREE.MeshPhongMaterial({color: color})
     , mesh = new THREE.Mesh(geometry, material)
@@ -164,4 +199,8 @@ RingElement.prototype.init = function (params) {
 
   // Keep a reference to the mesh to handle mouse events
   this.mesh = mesh;
+}
+
+RingElement.prototype.goTo = function () {
+  window.document.location = RingApp.URL_MAP[this.params.index];
 }
