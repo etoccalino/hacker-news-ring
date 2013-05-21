@@ -35,42 +35,22 @@ RingApp.prototype.init = function (params) {
   ring.init();
   this.addObject(ring);
 
+  this.ring = ring;
+
   // Position the camera to viewing distance
   this.camera.position.set(0, 0, ring.radium + RingApp.VIEWING_DISTANCE);
-
-  // Keep track of the selected element
-  this.selected = 0;
-
-  // Keep track of scene rotation
-  this.lastX = 0;
-  this.mouseDown = false;
 }
 
 RingApp.prototype.handleMouseDown = function(x, y)
 {
-  this.lastX = x;
-  this.mouseDown = true;
-}
+  var width = this.container.clientWidth
+    , xToCenter = x - width / 2;
 
-RingApp.prototype.handleMouseUp = function(x, y)
-{
-  this.lastX = x;
-  this.mouseDown = false;
-}
-
-RingApp.prototype.handleMouseMove = function(x, y)
-{
-  if (this.mouseDown) {
-
-    // Move the whole scene around the Y axis.
-    var dx = x - this.lastX;
-
-    if (Math.abs(dx) > RingApp.MOUSE_MOVE_TOLERANCE) {
-
-      this.root.rotation.y += (dx * 0.01);
-
-    }
-    this.lastX = x;
+  if (xToCenter > 0) {
+    this.ring.rotateClockwise();
+  }
+  else {
+    this.ring.rotateCounterClockwise();
   }
 }
 
@@ -100,8 +80,9 @@ Ring.prototype.init = function () {
   // The ring group to move elements together
   this.setObject3D(new THREE.Object3D());
 
-  // Compute the radium of the ring
+  // Compute the radium of the ring, and the element angle
   this.radium = (3 * RingApp.ELEMENTS_NUMBER * RingElement.WIDTH) / (4 * Math.PI);
+  this.angle = 2 * Math.PI / RingApp.ELEMENTS_NUMBER;
 
   // Add the ring elements
   for (var i = 0; i < RingApp.ELEMENTS_NUMBER; i++) {
@@ -112,6 +93,17 @@ Ring.prototype.init = function () {
     // Add the element to the ring
     this.object3D.add(element.mesh);
   }
+
+  // Keep track of the selected element
+  this.selected = 0;
+}
+
+Ring.prototype.rotateClockwise = function () {
+  this.object3D.rotation.y -= this.angle;
+}
+
+Ring.prototype.rotateCounterClockwise = function () {
+  this.object3D.rotation.y += this.angle;
 }
 
 //
@@ -144,14 +136,4 @@ RingElement.prototype.init = function (params) {
 
   // Keep a reference to the mesh to handle mouse events
   this.mesh = mesh;
-}
-
-RingElement.prototype.handleMouseOver = function(x, y)
-{
-  this.mesh.material.ambient.setRGB(.2,.2,.2);
-}
-
-RingElement.prototype.handleMouseOut = function(x, y)
-{
-  this.mesh.material.ambient.setRGB(0, 0, 0);
 }
