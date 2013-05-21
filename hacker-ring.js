@@ -13,11 +13,11 @@ RingApp.VIEWING_DISTANCE = 2;
 RingApp.ELEMENTS_NUMBER = 7;
 RingApp.COLOR_MAP = [
   0x0000ff,
-  0x0000f0,
+  0x000050,
   0x00ff00,
-  0x00f000,
+  0x005000,
   0xff0000,
-  0xf00000,
+  0x500000,
   0x101010];
 
 RingApp.URL_MAP = [
@@ -184,11 +184,13 @@ RingElement.WIDTH = 1;
 RingElement.prototype.init = function (params) {
   this.params = params || {};
 
-  var geometry = new THREE.CubeGeometry(RingElement.WIDTH, RingElement.WIDTH, RingElement.WIDTH / 16, 16, 16, 16)
+  var geometry = new THREE.PlaneGeometry(RingElement.WIDTH, RingElement.WIDTH, 16, 16)
     , color = RingApp.COLOR_MAP[this.params.index]
-    , material = new THREE.MeshPhongMaterial({color: color})
+    , material = new THREE.MeshBasicMaterial({color: color})
     , mesh = new THREE.Mesh(geometry, material)
     , f = Math.PI * 2 / RingApp.ELEMENTS_NUMBER;
+
+  mesh.doubleSided = true;
 
   // Position it around the ring
   mesh.position.x = this.params.radium * Math.sin(f * this.params.index);
