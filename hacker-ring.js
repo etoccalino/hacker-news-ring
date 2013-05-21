@@ -11,30 +11,35 @@ RingApp.MIN_CAMERA_Z = 1;
 RingApp.VIEWING_DISTANCE = 2;
 
 RingApp.ELEMENTS_NUMBER = 7;
-RingApp.COLOR_MAP = [
-  0x0000ff,
-  0x000050,
-  0x00ff00,
-  0x005000,
-  0xff0000,
-  0x500000,
-  0x101010];
-RingApp.URL_MAP = [
-  'http://google.com',
-  'http://yahoo.com',
-  'http://news.ycombinator.com',
-  'http://stackoverflow.com',
-  'http://github.com',
-  'http://imdb.com',
-  'http://creativa77.com.ar'];
-RingApp.TEXT_MAP = [
-  'google',
-  'yahoo',
-  'hacker-news',
-  'stackoverflow',
-  'github',
-  'imdb',
-  'creativa77'];
+RingApp.ELEMENTS = [{
+  color: 0x0000ff,
+  url: 'http://google.com',
+  name: 'google'
+}, {
+  color: 0x000050,
+  url: 'http://yahoo.com',
+  name: 'yahoo',
+}, {
+  color: 0x00ff00,
+  url: 'http://news.ycombinator.com',
+  name: 'hacker-news',
+}, {
+  color: 0x005000,
+  url: 'http://stackoverflow.com',
+  name: 'stackoverflow',
+}, {
+  color: 0xff0000,
+  url: 'http://github.com',
+  name: 'github',
+}, {
+  color: 0x500000,
+  url: 'http://imdb.com',
+  name: 'imdb',
+}, {
+  color: 0x101010,
+  url: 'http://creativa77.com.ar',
+  name: 'creativa77'
+}];
 
 
 RingApp.prototype.init = function (params) {
@@ -166,15 +171,15 @@ Ring.prototype.rotate = function (deltaY) {
 Ring.prototype.rotateClockwise = function () {
   this.rotate(-this.angle);
 
-  this.selected -= 1;
-  if (this.selected < 0) this.selected = RingApp.ELEMENTS_NUMBER - 1;
+  this.selected += 1;
+  if (this.selected == RingApp.ELEMENTS_NUMBER) this.selected = 0;
 }
 
 Ring.prototype.rotateCounterClockwise = function () {
   this.rotate(this.angle);
 
-  this.selected += 1;
-  if (this.selected == RingApp.ELEMENTS_NUMBER) this.selected = 0;
+  this.selected -= 1;
+  if (this.selected < 0) this.selected = RingApp.ELEMENTS_NUMBER - 1;
 }
 
 //
@@ -223,7 +228,7 @@ RingElement.prototype.init = function (params) {
 RingElement.prototype.createPage = function () {
 
   var geometry = new THREE.PlaneGeometry(RingElement.WIDTH, RingElement.WIDTH, 16, 16)
-    , color = RingApp.COLOR_MAP[this.params.index]
+    , color = RingApp.ELEMENTS[this.params.index].color
     , material = new THREE.MeshBasicMaterial({color: color})
     , mesh = new THREE.Mesh(geometry, material);
 
@@ -240,7 +245,7 @@ RingElement.prototype.createText = function () {
     , curveSegments = this.params.curveSegments || 2;
 
   // Contruct a text geometry for this text
-  var text = RingApp.TEXT_MAP[this.params.index]
+  var text = RingApp.ELEMENTS[this.params.index].name
     , geometry = new THREE.TextGeometry(text, {
         size: size,
         height: height,
@@ -263,5 +268,5 @@ RingElement.prototype.createText = function () {
 }
 
 RingElement.prototype.goTo = function () {
-  window.document.location = RingApp.URL_MAP[this.params.index];
+  window.document.location = RingApp.ELEMENTS[this.params.index].url;
 }
