@@ -25,12 +25,12 @@
       var app = null;
 
       $(document).ready(
-          function() {
-            var container = document.getElementById("container");
-            app = new MoveApp();
-            app.init({ container: container });
-            app.run();
-          }
+        function() {
+          var container = document.getElementById("container");
+          app = new RingApp();
+          app.init({ container: container });
+          app.run();
+        }
       );
     </script>
 
