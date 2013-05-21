@@ -41,6 +41,11 @@ RingApp.prototype.init = function (params) {
   this.camera.position.set(0, 0, ring.radium + RingApp.VIEWING_DISTANCE);
 }
 
+RingApp.prototype.update = function () {
+  TWEEN.update();
+  Sim.App.prototype.update.call(this);
+}
+
 RingApp.prototype.handleMouseDown = function(x, y)
 {
   var width = this.container.clientWidth
@@ -98,12 +103,28 @@ Ring.prototype.init = function () {
   this.selected = 0;
 }
 
+Ring.prototype.rotate = function (deltaY) {
+  if (! this.animating) {
+    // Lock the animation
+    this.animating = !this.animating;
+
+    // Compute the final value to tween to
+    var newY = this.object3D.rotation.y + this.angle;
+
+    // Start TWEEN, the app will update it
+    new TWEEN.Tween(this.object3D.rotation)
+      .to({y: newY}, 500)
+      .easing(TWEEN.Easing.Quadratic.EaseIn)
+      .start();
+  }
+}
+
 Ring.prototype.rotateClockwise = function () {
-  this.object3D.rotation.y -= this.angle;
+  this.rotate(-this.angle);
 }
 
 Ring.prototype.rotateCounterClockwise = function () {
-  this.object3D.rotation.y += this.angle;
+  this.rotate(this.angle);
 }
 
 //
