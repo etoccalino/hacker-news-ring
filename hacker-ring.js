@@ -14,31 +14,38 @@ RingApp.ELEMENTS_NUMBER = 7;
 RingApp.ELEMENTS = [{
   color: 0x0000ff,
   url: 'http://google.com',
-  name: 'google'
+  name: 'google',
+  text: 'the most popular search engine ever'
 }, {
   color: 0x000050,
   url: 'http://yahoo.com',
   name: 'yahoo',
+  text: 'one of the first popular search engines'
 }, {
   color: 0x00ff00,
   url: 'http://news.ycombinator.com',
   name: 'hacker-news',
+  text: 'indexes the news most interesting... to you'
 }, {
   color: 0x005000,
   url: 'http://stackoverflow.com',
   name: 'stackoverflow',
+  text: 'cosmopolitan hub of news and discusison'
 }, {
   color: 0xff0000,
   url: 'http://github.com',
   name: 'github',
+  text: 'social coding, for real'
 }, {
   color: 0x500000,
   url: 'http://imdb.com',
   name: 'imdb',
+  text: 'the internet movie database. say no more'
 }, {
   color: 0x101010,
   url: 'http://creativa77.com.ar',
-  name: 'creativa77'
+  name: 'creativa77',
+  text: 'smart people, turtle robots and lots of monitors'
 }];
 
 
@@ -240,33 +247,84 @@ RingElement.prototype.createPage = function () {
 }
 
 RingElement.prototype.createText = function () {
-  var size = this.params.size || .1
-    , height = this.params.height || .02
-    , curveSegments = this.params.curveSegments || 2;
+  var text = new Text();
 
-  // Contruct a text geometry for this text
-  var text = RingApp.ELEMENTS[this.params.index].name
-    , geometry = new THREE.TextGeometry(text, {
-        size: size,
-        height: height,
-        curveSegments: curveSegments,
-        font: 'helvetiker'
-    });
-
-  // Build the text mesh
-  var mesh = new THREE.Mesh(geometry, RingElement.TEXT_MATERIAL);
-
-  // Position the mesh centered in x
-  geometry.computeBoundingBox();
-  var centerOffset = -0.5 * (geometry.boundingBox.x[1] - geometry.boundingBox.x[0]);
-  mesh.position.x += centerOffset;
-
-  mesh.position.z = 0.1 * height;
-
-  // Add the page to this element group
-  this.object3D.add(mesh);
+  // Let the Text object add the meshes to the Object3D
+  text.init(RingApp.ELEMENTS[this.params.index].text, {root: this.object3D});
 }
 
 RingElement.prototype.goTo = function () {
   window.document.location = RingApp.ELEMENTS[this.params.index].url;
+}
+
+
+//
+//
+//
+
+Text = function () {
+  Sim.Object.call(this);
+}
+Text.prototype = new Sim.Object();
+
+Text.SIZE = .1;
+Text.HEIGHT = .02;
+Text.CURVESEGMENTS = 2;
+Text.LINE_HEIGHT = 2 * Text.SIZE;
+
+Text.MAX_LINES_PER_PAGE = 4;
+Text.MAX_CHARS_PER_PAGE = 15;
+
+Text.prototype.init = function (fullText, params) {
+  params = params || {};
+  this.root = params.root
+
+  this.size = params.size || Text.SIZE;
+  this.height = params.height || Text.HEIGHT;
+  this.curveSegments = params.curveSegments || Text.CURVESEGMENTS;
+
+  // Dissasembly the full text into a list of words
+  var words = fullText.split(' ');
+
+  // Reassemble the full text a sequence of lines
+  var lines = []
+    , line = words[0];
+  for (var i = 1; i < words.length; i++) {
+    if (line.length + words[i].length + 1 > Text.MAX_CHARS_PER_PAGE) {
+      lines.push(line);
+      line = words[i];
+    }
+    else {
+      line += ' ' + words[i];
+    }
+  }
+  if (line.length > 0) lines.push(line);
+
+  // Contruct a text geometry for each line
+  for (var i = 0; i < lines.length; i++) {
+
+    var geometry = new THREE.TextGeometry(lines[i], {
+      size: this.size,
+      height: this.height,
+      curveSegments: this.curveSegments,
+      font: 'helvetiker'
+    });
+
+    // Build this text mesh
+    var mesh = new THREE.Mesh(geometry, RingElement.TEXT_MATERIAL);
+
+    // Position the mesh centered in x
+    geometry.computeBoundingBox();
+    var centerOffset = -0.5 * (geometry.boundingBox.x[1] - geometry.boundingBox.x[0]);
+    mesh.position.x += centerOffset;
+
+    // Position this line's mesh above / below as it corresponds
+    mesh.position.y = - Text.LINE_HEIGHT * (i - Math.floor(lines.length / 2));
+
+    // Move it slightly closer, to avoid piercing the page
+    mesh.position.z = 0.1 * this.height;
+
+    // Add this line to the root object
+    this.root.add(mesh);
+  }
 }
