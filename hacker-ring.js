@@ -300,6 +300,9 @@ Text.prototype.init = function (fullText, params) {
   }
   if (line.length > 0) lines.push(line);
 
+  // Truncate the text to the total number of lines allowed
+  lines = lines.slice(0, Text.MAX_LINES_PER_PAGE);
+
   // Contruct a text geometry for each line
   for (var i = 0; i < lines.length; i++) {
 
