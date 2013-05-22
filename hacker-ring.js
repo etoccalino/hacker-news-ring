@@ -200,7 +200,6 @@ RingElement = function () {
 RingElement.prototype = new Sim.Object();
 
 RingElement.WIDTH = 1;
-RingElement.TEXT_MATERIAL = new THREE.MeshPhongMaterial({color: 0xf0f0f0, overdraw: true});
 
 RingElement.prototype.init = function (params) {
   this.params = params || {};
@@ -275,6 +274,8 @@ Text.LINE_HEIGHT = 2 * Text.SIZE;
 Text.MAX_LINES_PER_PAGE = 4;
 Text.MAX_CHARS_PER_PAGE = 15;
 
+Text.MATERIAL = new THREE.MeshPhongMaterial({color: 0xf0f0f0, overdraw: true});
+
 Text.prototype.init = function (fullText, params) {
   params = params || {};
   this.root = params.root
@@ -314,7 +315,7 @@ Text.prototype.init = function (fullText, params) {
     });
 
     // Build this text mesh
-    var mesh = new THREE.Mesh(geometry, RingElement.TEXT_MATERIAL);
+    var mesh = new THREE.Mesh(geometry, Text.MATERIAL);
 
     // Position the mesh centered in x
     geometry.computeBoundingBox();
