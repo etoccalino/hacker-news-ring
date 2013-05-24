@@ -30,15 +30,21 @@
 
       $(document).ready(
         function() {
+
+          // Initialize the client app
           var container = document.getElementById("container");
           app = new RingApp();
           app.init({ container: container });
-          app.run();
 
+          // Initialize the backend connection
           var socket = io.connect('http://localhost');
           socket.on('news', function (news) {
-            console.log('connection open. News: ' + JSON.stringify(news));
+            // Update the app news
+            app.updateNews(news);
           });
+
+          // Run the app code
+          app.run();
         }
       );
 

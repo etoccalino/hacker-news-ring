@@ -10,25 +10,25 @@ app.get('/', function(req, res, next){
 
 var news = [{
   url: 'http://google.com',
-  text: 'the most popular search engine ever'
+  headline: 'the most popular search engine ever'
 }, {
   url: 'http://yahoo.com',
-  text: 'one of the first popular search engines'
+  headline: 'one of the first popular search engines'
 }, {
   url: 'http://news.ycombinator.com',
-  text: 'indexes the news most interesting... to you'
+  headline: 'indexes the news most interesting... to you'
 }, {
   url: 'http://stackoverflow.com',
-  text: 'cosmopolitan hub of news and discusison'
+  headline: 'cosmopolitan hub of news and discusison'
 }, {
   url: 'http://github.com',
-  text: 'social coding, for real'
+  headline: 'social coding, for real'
 }, {
   url: 'http://imdb.com',
-  text: 'the internet movie database. say no more'
+  headline: 'the internet movie database. say no more'
 }, {
   url: 'http://creativa77.com.ar',
-  text: 'smart people, turtle robots and lots of monitors'
+  headline: 'smart people, turtle robots and lots of monitors'
 }];
 
 io.sockets.on('connection', function (socket) {

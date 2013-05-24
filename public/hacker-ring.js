@@ -11,43 +11,7 @@ RingApp.MIN_CAMERA_Z = 1;
 RingApp.VIEWING_DISTANCE = 2;
 
 RingApp.ELEMENTS_NUMBER = 7;
-RingApp.ELEMENTS = [{
-  color: 0x0000ff,
-  url: 'http://google.com',
-  name: 'google',
-  text: 'the most popular search engine ever'
-}, {
-  color: 0x000050,
-  url: 'http://yahoo.com',
-  name: 'yahoo',
-  text: 'one of the first popular search engines'
-}, {
-  color: 0x00ff00,
-  url: 'http://news.ycombinator.com',
-  name: 'hacker-news',
-  text: 'indexes the news most interesting... to you'
-}, {
-  color: 0x005000,
-  url: 'http://stackoverflow.com',
-  name: 'stackoverflow',
-  text: 'cosmopolitan hub of news and discusison'
-}, {
-  color: 0xff0000,
-  url: 'http://github.com',
-  name: 'github',
-  text: 'social coding, for real'
-}, {
-  color: 0x500000,
-  url: 'http://imdb.com',
-  name: 'imdb',
-  text: 'the internet movie database. say no more'
-}, {
-  color: 0x101010,
-  url: 'http://creativa77.com.ar',
-  name: 'creativa77',
-  text: 'smart people, turtle robots and lots of monitors'
-}];
-
+RingApp.ELEMENT_COLORS = [0x0000ff, 0x000050, 0x00ff00, 0x005000, 0xff0000, 0x500000, 0x101010];
 
 RingApp.prototype.init = function (params) {
 
@@ -59,20 +23,27 @@ RingApp.prototype.init = function (params) {
   light.position.set(0, -1, 1).normalize();
   this.scene.add(light);
 
-  // Add the ring of elements
-  var ring = new Ring();
-  ring.init();
-  this.addObject(ring);
-
-  this.ring = ring;
-
   // Position the camera to viewing distance
-  this.camera.position.set(0, 0, ring.radium + RingApp.VIEWING_DISTANCE);
+  this.camera.position.set(0, 0, Ring.RADIUM + RingApp.VIEWING_DISTANCE);
 }
 
 RingApp.prototype.update = function () {
   TWEEN.update();
   Sim.App.prototype.update.call(this);
+}
+
+RingApp.prototype.updateNews = function (news) {
+  if (! this.ring) {
+
+    // Add the ring of elements
+    var ring = new Ring();
+    ring.init();
+    this.addObject(ring);
+
+    this.ring = ring;
+  }
+  // Delegate on the only ring
+  return this.ring.updateNews(news);
 }
 
 RingApp.prototype.handleMouseDown = function(x, y)
@@ -81,9 +52,9 @@ RingApp.prototype.handleMouseDown = function(x, y)
     , xToCenter = x - width / 2;
 
   //
-  // ERROR: xToCenter is in pixes, RingElement.WIDTH is in meters
+  // ERROR: xToCenter is in pixes, Ring.ELEMENT_WIDTH is in meters
   //
-  if (Math.abs(xToCenter) < RingElement.WIDTH*100 / 2) {
+  if (Math.abs(xToCenter) < Ring.ELEMENT_WIDTH*100 / 2) {
     // Clicked on the front element
     this.ring.select();
   }
@@ -123,6 +94,12 @@ Ring.prototype = new Sim.Object();
 
 Ring.ANIMATION_INTERVAL = 500;
 
+// Compute the radium of the ring, and the element angle
+Ring.ELEMENT_WIDTH = 1;
+Ring.RADIUM = (3 * RingApp.ELEMENTS_NUMBER * Ring.ELEMENT_WIDTH) / (4 * Math.PI);
+Ring.ANGLE = 2 * Math.PI / RingApp.ELEMENTS_NUMBER;
+
+
 Ring.prototype.init = function () {
   // The ring group to move elements together
   this.setObject3D(new THREE.Object3D());
@@ -130,15 +107,11 @@ Ring.prototype.init = function () {
   // Keep a reference to the elements
   this.elements = [];
 
-  // Compute the radium of the ring, and the element angle
-  this.radium = (3 * RingApp.ELEMENTS_NUMBER * RingElement.WIDTH) / (4 * Math.PI);
-  this.angle = 2 * Math.PI / RingApp.ELEMENTS_NUMBER;
-
   // Add the ring elements
   for (var i = 0; i < RingApp.ELEMENTS_NUMBER; i++) {
     var element = new RingElement();
 
-    element.init({radium: this.radium, index: i});
+    element.init({radium: Ring.RADIUM, index: i});
 
     // Add the element to the ring
     this.addChild(element);
@@ -152,6 +125,13 @@ Ring.prototype.init = function () {
 
 Ring.prototype.select = function () {
   this.elements[this.selected].goTo();
+}
+
+Ring.prototype.updateNews = function (news) {
+  // Update each element
+  for (var i = 0; i < news.length; i++) {
+    this.elements[i].updateText(news[i]);
+  }
 }
 
 Ring.prototype.rotate = function (deltaY) {
@@ -176,14 +156,14 @@ Ring.prototype.rotate = function (deltaY) {
 }
 
 Ring.prototype.rotateClockwise = function () {
-  this.rotate(-this.angle);
+  this.rotate(-Ring.ANGLE);
 
   this.selected += 1;
   if (this.selected == RingApp.ELEMENTS_NUMBER) this.selected = 0;
 }
 
 Ring.prototype.rotateCounterClockwise = function () {
-  this.rotate(this.angle);
+  this.rotate(Ring.ANGLE);
 
   this.selected -= 1;
   if (this.selected < 0) this.selected = RingApp.ELEMENTS_NUMBER - 1;
@@ -198,8 +178,6 @@ RingElement = function () {
   Sim.Object.call(this);
 }
 RingElement.prototype = new Sim.Object();
-
-RingElement.WIDTH = 1;
 
 RingElement.prototype.init = function (params) {
   this.params = params || {};
@@ -222,7 +200,6 @@ RingElement.prototype.init = function (params) {
 
   // Create a page on which to write
   this.createPage();
-  this.createText();
 
   // Position it around the ring
   this.object3D.position = position;
@@ -233,8 +210,8 @@ RingElement.prototype.init = function (params) {
 
 RingElement.prototype.createPage = function () {
 
-  var geometry = new THREE.PlaneGeometry(RingElement.WIDTH, RingElement.WIDTH, 16, 16)
-    , color = RingApp.ELEMENTS[this.params.index].color
+  var geometry = new THREE.PlaneGeometry(Ring.ELEMENT_WIDTH, Ring.ELEMENT_WIDTH, 16, 16)
+    , color = RingApp.ELEMENT_COLORS[this.params.index]
     , material = new THREE.MeshBasicMaterial({color: color})
     , mesh = new THREE.Mesh(geometry, material);
 
@@ -245,15 +222,21 @@ RingElement.prototype.createPage = function () {
   this.object3D.add(mesh);
 }
 
-RingElement.prototype.createText = function () {
-  var text = new Text();
+RingElement.prototype.updateText = function (news) {
+  // Loose the old text, if any
+  if (this.text)
+    this.text.destroy();
+
+  this.text = new Text();
 
   // Let the Text object add the meshes to the Object3D
-  text.init(RingApp.ELEMENTS[this.params.index].text, {root: this.object3D});
+  this.text.init(news.headline, {root: this.object3D});
+
+  this.url = news.url;
 }
 
 RingElement.prototype.goTo = function () {
-  window.document.location = RingApp.ELEMENTS[this.params.index].url;
+  window.document.location = this.url;
 }
 
 
