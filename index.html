@@ -17,11 +17,14 @@
     <script src="libs/jquery.mousewheel.js"></script>
     <script src="libs/RequestAnimationFrame.js"></script>
     <script src="libs/Tween.js"></script>
-    <script src="sim/sim.js"></script>
-    <script src="sim/animation.js"></script>
-    <script src="sim/interaction.js"></script>
+    <script src="libs/sim/sim.js"></script>
+    <script src="libs/sim/animation.js"></script>
+    <script src="libs/sim/interaction.js"></script>
     <script src="fonts/helvetiker_regular.typeface.js"></script>
     <script src="hacker-ring.js"></script>
+
+    <script src="socket.io/socket.io.js"></script>
+
     <script>
       var app = null;
 
@@ -31,8 +34,15 @@
           app = new RingApp();
           app.init({ container: container });
           app.run();
+
+          var socket = io.connect('http://localhost');
+          socket.on('news', function (news) {
+            console.log('connection open. News: ' + JSON.stringify(news));
+          });
         }
       );
+
+
     </script>
 
 </head>
