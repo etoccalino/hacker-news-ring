@@ -26,7 +26,7 @@ Scraper.prototype.start = function () {
   var that = this;
   this.timeout = setTimeout(function () {
     that.scrape(function (results) {
-      that.emit('news', results);
+      that.emit('news', results.items);
     });
 
     that.timeout = setTimeout(arguments.callee, that.interval);
@@ -42,6 +42,16 @@ Scraper.prototype.stop = function () {
 }
 
 Scraper.prototype.scrape = function (fn) {
-  var results = [];
-  fn(results);
+
+  http.get(this.url, function (res) {
+    var data = '';
+    res.on('data', function (chunk) {
+      data += chunk;
+    });
+    res.on('end', function () {
+      fn(JSON.parse(data));
+    });
+  }).on('error', function (error) {
+    console.log("Scraper found an error: " + error.message);
+  });
 }
