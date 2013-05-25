@@ -31,7 +31,7 @@ var news = [{
   headline: 'smart people, turtle robots and lots of monitors'
 }];
 
-io.sockets.on('connection', function (socket) {
+io.of('/news').on('connection', function (socket) {
   socket.emit('news', news);
 });
 
