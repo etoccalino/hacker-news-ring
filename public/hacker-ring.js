@@ -102,6 +102,8 @@ Ring.NORMAL_SCALE = new THREE.Vector3(1, 1, 1);
 Ring.MAXI_SCALE = new THREE.Vector3(10, 10, 10);
 
 Ring.prototype.init = function (news) {
+  this.name = randomName();
+
   // The ring group to move elements together
   this.setObject3D(new THREE.Object3D());
 
@@ -204,6 +206,8 @@ RingElement = function () {
 RingElement.prototype = new Sim.Object();
 
 RingElement.prototype.init = function (params) {
+  this.name = randomName();
+
   this.params = params || {};
 
   // Create a group for the page and its text
@@ -280,6 +284,8 @@ Text.MAX_CHARS_PER_PAGE = 15;
 Text.MATERIAL = new THREE.MeshPhongMaterial({color: 0xf0f0f0, overdraw: true});
 
 Text.prototype.init = function (fullText, params) {
+  this.name = randomName();
+
   params = params || {};
   this.root = params.root
 
@@ -342,4 +348,13 @@ Text.prototype.formatText = function (fullText) {
   lines = lines.slice(0, Text.MAX_LINES_PER_PAGE);
 
   return lines;
+}
+
+
+//
+//
+//
+
+function randomName () {
+  return Math.random().toString().slice(2);
 }
