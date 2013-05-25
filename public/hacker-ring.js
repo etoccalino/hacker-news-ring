@@ -10,8 +10,8 @@ RingApp.MIN_CAMERA_Z = 1;
 
 RingApp.VIEWING_DISTANCE = 2;
 
-RingApp.ELEMENTS_NUMBER = 7;
-RingApp.ELEMENT_COLORS = [0x0000ff, 0x000050, 0x00ff00, 0x005000, 0xff0000, 0x500000, 0x101010];
+RingApp.ELEMENTS_NUMBER = 10;
+RingApp.ELEMENT_COLORS = [0x0000ff, 0x000050, 0x00ff00, 0x005000, 0xff0000, 0x500000, 0x101010, 0x0000ff, 0x000050, 0x00ff00];
 
 RingApp.prototype.init = function (params) {
 
@@ -254,7 +254,7 @@ RingElement.prototype.updateText = function (news) {
   this.text = new Text();
 
   // Let the Text object add the meshes to the Object3D
-  this.text.init(news.headline, {root: this.object3D});
+  this.text.init(news.title, {root: this.object3D});
 
   this.url = news.url;
 }

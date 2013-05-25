@@ -15,35 +15,14 @@ app.get('/', function(req, res, next){
 
 // The scraper will keep clients updated
 
-scraper = new Scraper();
+var oldNews = [];
+
+var scraper = new Scraper();
 scraper.on('news', function (news) {
   // Keep a copy to serve to newly connected clients
-  // oldNews = news;
+  oldNews = news;
 });
 scraper.start();
-
-var oldNews = [{
-  url: 'http://google.com',
-  headline: 'the most popular search engine ever'
-}, {
-  url: 'http://yahoo.com',
-  headline: 'one of the first popular search engines'
-}, {
-  url: 'http://news.ycombinator.com',
-  headline: 'indexes the news most interesting... to you'
-}, {
-  url: 'http://stackoverflow.com',
-  headline: 'cosmopolitan hub of news and discusison'
-}, {
-  url: 'http://github.com',
-  headline: 'social coding, for real'
-}, {
-  url: 'http://imdb.com',
-  headline: 'the internet movie database. say no more'
-}, {
-  url: 'http://creativa77.com.ar',
-  headline: 'smart people, turtle robots and lots of monitors'
-}];
 
 // Configure updates
 
@@ -51,7 +30,7 @@ io.of('/news').on('connection', function (socket) {
   socket.emit('news', oldNews);
 
   scraper.on('news', function (news) {
-    // socket.emit('news', news);
+    socket.emit('news', news);
   });
 });
 
