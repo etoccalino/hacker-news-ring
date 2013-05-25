@@ -190,7 +190,7 @@ Ring.prototype.animateToFullSize = function () {
       })
       .start();
   }
-};
+}
 
 
 //
@@ -247,10 +247,6 @@ RingElement.prototype.createPage = function () {
 }
 
 RingElement.prototype.updateText = function (news) {
-  // Loose the old text, if any
-  if (this.text)
-    this.text.destroy();
-
   this.text = new Text();
 
   // Let the Text object add the meshes to the Object3D
@@ -291,6 +287,40 @@ Text.prototype.init = function (fullText, params) {
   this.height = params.height || Text.HEIGHT;
   this.curveSegments = params.curveSegments || Text.CURVESEGMENTS;
 
+  var lines = this.formatText(fullText);
+
+  // Contruct a text geometry for each line
+  for (var i = 0; i < lines.length; i++) {
+
+    var geometry = new THREE.TextGeometry(lines[i], {
+      size: this.size,
+      height: this.height,
+      curveSegments: this.curveSegments,
+      font: 'helvetiker'
+    });
+
+    // Build this text mesh
+    var mesh = new THREE.Mesh(geometry, Text.MATERIAL);
+
+    geometry.computeBoundingBox();
+    mesh.position = {
+      // Position the mesh centered in x
+      x: mesh.position.x - 0.5 * (geometry.boundingBox.x[1] - geometry.boundingBox.x[0]),
+
+      // Position this line's mesh above / below as it corresponds
+      y: - Text.LINE_HEIGHT * (i - Math.floor(lines.length / 2)),
+
+      // Move it slightly closer, to avoid piercing the page
+      z: 0.1 * this.height
+    };
+
+    // Add this line to the root object
+    this.root.add(mesh);
+  }
+}
+
+Text.prototype.formatText = function (fullText) {
+
   // Dissasembly the full text into a list of words
   var words = fullText.split(' ');
 
@@ -311,31 +341,5 @@ Text.prototype.init = function (fullText, params) {
   // Truncate the text to the total number of lines allowed
   lines = lines.slice(0, Text.MAX_LINES_PER_PAGE);
 
-  // Contruct a text geometry for each line
-  for (var i = 0; i < lines.length; i++) {
-
-    var geometry = new THREE.TextGeometry(lines[i], {
-      size: this.size,
-      height: this.height,
-      curveSegments: this.curveSegments,
-      font: 'helvetiker'
-    });
-
-    // Build this text mesh
-    var mesh = new THREE.Mesh(geometry, Text.MATERIAL);
-
-    // Position the mesh centered in x
-    geometry.computeBoundingBox();
-    var centerOffset = -0.5 * (geometry.boundingBox.x[1] - geometry.boundingBox.x[0]);
-    mesh.position.x += centerOffset;
-
-    // Position this line's mesh above / below as it corresponds
-    mesh.position.y = - Text.LINE_HEIGHT * (i - Math.floor(lines.length / 2));
-
-    // Move it slightly closer, to avoid piercing the page
-    mesh.position.z = 0.1 * this.height;
-
-    // Add this line to the root object
-    this.root.add(mesh);
-  }
+  return lines;
 }
