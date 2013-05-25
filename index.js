@@ -4,6 +4,8 @@ var express = require('express')
   , Scraper = require('./utils/scraper')
   , io = require('socket.io').listen(server);
 
+io.set('log level', 1);
+
 // The express app will serve the client code
 
 app.use(express.static('public'));
