@@ -23,12 +23,19 @@ Scraper.prototype.start = function () {
 
   this.started = true;
 
+
   var that = this;
+
+  // Make the first request right away
+  that.scrape(function (results) {
+    that.emit('news', results.items);
+  });
+
+  // Schedule next requests at regular intervals
   this.timeout = setTimeout(function () {
     that.scrape(function (results) {
       that.emit('news', results.items);
     });
-
     that.timeout = setTimeout(arguments.callee, that.interval);
   }, this.interval);
 }
@@ -49,7 +56,12 @@ Scraper.prototype.scrape = function (fn) {
       data += chunk;
     });
     res.on('end', function () {
-      fn(JSON.parse(data));
+      try {
+        fn(JSON.parse(data));
+      }
+      catch (error) {
+        console.log("Scraper found an error while parsing: " + error.message);
+      }
     });
   }).on('error', function (error) {
     console.log("Scraper found an error: " + error.message);
