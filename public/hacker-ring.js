@@ -37,13 +37,11 @@ RingApp.prototype.updateNews = function (news) {
 
     // Add the ring of elements
     var ring = new Ring();
-    ring.init();
+    ring.init(news);
     this.addObject(ring);
 
     this.ring = ring;
   }
-  // Delegate on the only ring
-  return this.ring.updateNews(news);
 }
 
 RingApp.prototype.handleMouseDown = function(x, y)
@@ -100,7 +98,7 @@ Ring.RADIUM = (3 * RingApp.ELEMENTS_NUMBER * Ring.ELEMENT_WIDTH) / (4 * Math.PI)
 Ring.ANGLE = 2 * Math.PI / RingApp.ELEMENTS_NUMBER;
 
 
-Ring.prototype.init = function () {
+Ring.prototype.init = function (news) {
   // The ring group to move elements together
   this.setObject3D(new THREE.Object3D());
 
@@ -112,6 +110,9 @@ Ring.prototype.init = function () {
     var element = new RingElement();
 
     element.init({radium: Ring.RADIUM, index: i});
+
+    // Update the element to its text
+    element.updateText(news[i]);
 
     // Add the element to the ring
     this.addChild(element);
@@ -125,13 +126,6 @@ Ring.prototype.init = function () {
 
 Ring.prototype.select = function () {
   this.elements[this.selected].goTo();
-}
-
-Ring.prototype.updateNews = function (news) {
-  // Update each element
-  for (var i = 0; i < news.length; i++) {
-    this.elements[i].updateText(news[i]);
-  }
 }
 
 Ring.prototype.rotate = function (deltaY) {
