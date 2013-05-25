@@ -97,6 +97,9 @@ Ring.ELEMENT_WIDTH = 1;
 Ring.RADIUM = (3 * RingApp.ELEMENTS_NUMBER * Ring.ELEMENT_WIDTH) / (4 * Math.PI);
 Ring.ANGLE = 2 * Math.PI / RingApp.ELEMENTS_NUMBER;
 
+Ring.MINI_SCALE = new THREE.Vector3(0.1, 0.1, 0.1);
+Ring.NORMAL_SCALE = new THREE.Vector3(1, 1, 1);
+Ring.MAXI_SCALE = new THREE.Vector3(10, 10, 10);
 
 Ring.prototype.init = function (news) {
   // The ring group to move elements together
@@ -122,6 +125,14 @@ Ring.prototype.init = function (news) {
 
   // Keep track of the selected element
   this.selected = 0;
+
+  // Allow only one animation at a time
+  this.animating = false;
+
+  // Start small, and grow to full size
+  this.object3D.scale = Ring.MINI_SCALE;
+
+  this.animateToFullSize();
 }
 
 Ring.prototype.select = function () {
@@ -162,6 +173,25 @@ Ring.prototype.rotateCounterClockwise = function () {
   this.selected -= 1;
   if (this.selected < 0) this.selected = RingApp.ELEMENTS_NUMBER - 1;
 }
+
+Ring.prototype.animateToFullSize = function () {
+  if (! this.animating) {
+    // Lock the animation
+    this.animating = !this.animating;
+
+    // Start TWEEN, the app will update it
+    var that = this;
+    new TWEEN.Tween(this.object3D.scale)
+      .to(Ring.NORMAL_SCALE, Ring.ANIMATION_INTERVAL)
+      .easing(TWEEN.Easing.Quadratic.EaseOut)
+      .onComplete(function () {
+        // Unlock the animation
+        that.animating = !that.animating;
+      })
+      .start();
+  }
+};
+
 
 //
 //
