@@ -59,7 +59,6 @@ RingApp.prototype.buildNewRing = function (news) {
   this.ring = ring;
 }
 
-
 RingApp.prototype.handleMouseDown = function(x, y)
 {
   var width = this.container.clientWidth
@@ -113,9 +112,9 @@ Ring.ELEMENT_WIDTH = 1;
 Ring.RADIUM = (3 * RingApp.ELEMENTS_NUMBER * Ring.ELEMENT_WIDTH) / (4 * Math.PI);
 Ring.ANGLE = 2 * Math.PI / RingApp.ELEMENTS_NUMBER;
 
-Ring.MINI_SCALE = new THREE.Vector3(0.1, 0.1, 0.1);
-Ring.NORMAL_SCALE = new THREE.Vector3(1, 1, 1);
-Ring.MAXI_SCALE = new THREE.Vector3(10, 10, 10);
+Ring.MINI_SCALE_SCALAR = 0.1;
+Ring.NORMAL_SCALE_SCALAR = 1;
+Ring.MAXI_SCALE_SCALAR = 10;
 
 Ring.prototype.init = function (news) {
   this.name = randomName();
@@ -148,7 +147,7 @@ Ring.prototype.init = function (news) {
   this.animating = false;
 
   // Start small, and grow to full size
-  this.object3D.scale = Ring.MINI_SCALE;
+  this.object3D.scale = new THREE.Vector3(Ring.MINI_SCALE_SCALAR, Ring.MINI_SCALE_SCALAR, Ring.MINI_SCALE_SCALAR);
 
   this.animateToFullSize();
 }
@@ -166,9 +165,10 @@ Ring.prototype.animateToMaxiSize = function (fn) {
     this.animating = true;
 
     // Start TWEEN, the app will update it
-    var that = this;
+    var that = this
+      , maxi = new THREE.Vector3(Ring.MAXI_SCALE_SCALAR, Ring.MAXI_SCALE_SCALAR, Ring.MAXI_SCALE_SCALAR);
     new TWEEN.Tween(this.object3D.scale)
-      .to(Ring.MAXI_SCALE, Ring.ANIMATION_INTERVAL)
+      .to(maxi, Ring.ANIMATION_INTERVAL)
       .easing(TWEEN.Easing.Quadratic.EaseOut)
       .onComplete(fn)
       .start();
@@ -222,9 +222,10 @@ Ring.prototype.animateToFullSize = function () {
     this.animating = !this.animating;
 
     // Start TWEEN, the app will update it
-    var that = this;
+    var that = this
+      , normal = new THREE.Vector3(Ring.NORMAL_SCALE_SCALAR, Ring.NORMAL_SCALE_SCALAR, Ring.NORMAL_SCALE_SCALAR);
     new TWEEN.Tween(this.object3D.scale)
-      .to(Ring.NORMAL_SCALE, Ring.ANIMATION_INTERVAL)
+      .to(normal, Ring.ANIMATION_INTERVAL)
       .easing(TWEEN.Easing.Quadratic.EaseOut)
       .onComplete(function () {
         // Unlock the animation
