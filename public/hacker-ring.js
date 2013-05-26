@@ -33,16 +33,32 @@ RingApp.prototype.update = function () {
 }
 
 RingApp.prototype.updateNews = function (news) {
+  console.log('DEBUG: updating news.');
+
   if (! this.ring) {
-
-    // Add the ring of elements
-    var ring = new Ring();
-    ring.init(news);
-    this.addObject(ring);
-
-    this.ring = ring;
+    this.buildNewRing(news);
+  }
+  else {
+    var oldRing = this.ring
+      , that = this;
+    oldRing.destroy(function () {
+      console.log('DEBUG: app.removeObject() on ring=' + oldRing.name);
+      that.removeObject(oldRing);
+      that.buildNewRing(news);
+    });
   }
 }
+
+RingApp.prototype.buildNewRing = function (news) {
+  // Add the ring of elements
+  var ring = new Ring();
+  ring.init(news);
+  console.log('DEBUG: app.addObject() on ring=' + ring.name);
+  this.addObject(ring);
+
+  this.ring = ring;
+}
+
 
 RingApp.prototype.handleMouseDown = function(x, y)
 {
@@ -135,6 +151,30 @@ Ring.prototype.init = function (news) {
   this.object3D.scale = Ring.MINI_SCALE;
 
   this.animateToFullSize();
+}
+
+Ring.prototype.destroy = function (fn) {
+  console.log('DEBUG: Ring.destroy()');
+
+  this.animating = false;
+  this.animateToMaxiSize(fn);
+}
+
+Ring.prototype.animateToMaxiSize = function (fn) {
+  if (! this.animating) {
+    // Lock animations
+    this.animating = true;
+
+    // Start TWEEN, the app will update it
+    var that = this;
+    new TWEEN.Tween(this.object3D.scale)
+      .to(Ring.MAXI_SCALE, Ring.ANIMATION_INTERVAL)
+      .easing(TWEEN.Easing.Quadratic.EaseOut)
+      .onComplete(fn)
+      .start();
+    console.log('DEBUG: Ring.animateToMaxiSize() tween created');
+  }
+  else console.log('DEBUG: Ring.animateToMaxiSize() error -- animating=false');
 }
 
 Ring.prototype.select = function () {

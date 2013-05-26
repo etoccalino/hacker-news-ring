@@ -17,8 +17,11 @@ app.get('/', function(req, res, next){
 
 var oldNews = [];
 
-var scraper = new Scraper();
+var scraper = new Scraper({interval: 10000});
+// var scraper = new Scraper();
 scraper.on('news', function (news) {
+  console.log('Server received news update')
+
   // Keep a copy to serve to newly connected clients
   oldNews = news;
 });
