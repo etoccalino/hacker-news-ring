@@ -44,8 +44,8 @@ RingApp.prototype.updateNews = function (news) {
     oldRing.destroy(function () {
       console.log('DEBUG: app.removeObject() on ring=' + oldRing.name);
       that.removeObject(oldRing);
-      that.buildNewRing(news);
     });
+    that.buildNewRing(news);
   }
 }
 
@@ -106,6 +106,7 @@ Ring = function () {
 Ring.prototype = new Sim.Object();
 
 Ring.ANIMATION_INTERVAL = 500;
+Ring.MAXI_ANIMATION_INTERVAL = 1500;
 
 // Compute the radium of the ring, and the element angle
 Ring.ELEMENT_WIDTH = 1;
@@ -114,7 +115,7 @@ Ring.ANGLE = 2 * Math.PI / RingApp.ELEMENTS_NUMBER;
 
 Ring.MINI_SCALE_SCALAR = 0.1;
 Ring.NORMAL_SCALE_SCALAR = 1;
-Ring.MAXI_SCALE_SCALAR = 10;
+Ring.MAXI_SCALE_SCALAR = 50;
 
 Ring.prototype.init = function (news) {
   this.name = randomName();
@@ -168,8 +169,8 @@ Ring.prototype.animateToMaxiSize = function (fn) {
     var that = this
       , maxi = new THREE.Vector3(Ring.MAXI_SCALE_SCALAR, Ring.MAXI_SCALE_SCALAR, Ring.MAXI_SCALE_SCALAR);
     new TWEEN.Tween(this.object3D.scale)
-      .to(maxi, Ring.ANIMATION_INTERVAL)
-      .easing(TWEEN.Easing.Quadratic.EaseOut)
+      .to(maxi, Ring.MAXI_ANIMATION_INTERVAL)
+      .easing(TWEEN.Easing.Exponential.EaseIn)
       .onComplete(fn)
       .start();
     console.log('DEBUG: Ring.animateToMaxiSize() tween created');
