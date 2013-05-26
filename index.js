@@ -17,7 +17,7 @@ app.get('/', function(req, res, next){
 
 var oldNews = [];
 
-var scraper = new Monitor({interval: 10000});
+var scraper = new Monitor({interval: 3000, debug: true});
 // var scraper = new Scraper();
 scraper.on('news', function (news) {
   console.log('Server received news update')

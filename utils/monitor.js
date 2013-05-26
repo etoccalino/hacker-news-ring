@@ -14,6 +14,7 @@ function Monitor (params) {
   params = params || {};
   this.interval = params.interval || 60000;
   this.url = params.url || 'http://api.ihackernews.com/page';
+  this.debug = params.debug || false;
 
   // Keep a signature of the last news, to compare
   this.newsSignature = '';
@@ -50,7 +51,12 @@ Monitor.prototype.stop = function () {
 }
 
 Monitor.prototype.checkNews = function () {
+  if (this.debug) {
+    return this.emit('news', Monitor.dummyNews);
+  }
+
   var that = this;
+
   scrape(this.url, function (results) {
     var news = results.items
       , signature = sigmund(news);
@@ -62,3 +68,36 @@ Monitor.prototype.checkNews = function () {
     }
   });
 }
+
+Monitor.dummyNews = [{
+    title: 'dummy 0'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 1'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 2'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 3'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 4'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 5'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 6'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 7'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 8'
+  , url: 'http://github.com/'
+}, {
+    title: 'dummy 9'
+  , url: 'http://github.com/'
+}, {
+}];
