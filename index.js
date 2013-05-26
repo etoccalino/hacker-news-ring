@@ -1,7 +1,7 @@
 var express = require('express')
   , app = express(app)
   , server = require('http').createServer(app)
-  , Scraper = require('./utils/scraper')
+  , Monitor = require('./utils/monitor')
   , io = require('socket.io').listen(server);
 
 io.set('log level', 1);
@@ -17,7 +17,7 @@ app.get('/', function(req, res, next){
 
 var oldNews = [];
 
-var scraper = new Scraper({interval: 10000});
+var scraper = new Monitor({interval: 10000});
 // var scraper = new Scraper();
 scraper.on('news', function (news) {
   console.log('Server received news update')
